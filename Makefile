@@ -2,7 +2,7 @@ CC = gcc
 #CFLAGS = -Wall -Wextra -std=c11 -O2 -g -mavx2
 CFLAGS = -O2 -mavx2
 INCLUDES = -Isrc
-LDFLAGS = -lm -lX11 -lpng
+LDFLAGS = -lm -lX11 -lpng -lGL -lGLEW -lglfw
 
 SRC_DIR = src
 BUILD_DIR = build
@@ -17,7 +17,7 @@ all:
 	$(CC) $(CFLAGS) $(INCLUDES) ./$(SRC_DIR)/Main.c -o ./$(TARGET) $(LDFLAGS) 
 
 exe:
-	./$(TARGET) /home/codeleaded/Hecke/C/
+	./$(TARGET)
 
 clean:
 	rm -rf $(BUILD_DIR)/*

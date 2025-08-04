@@ -111,14 +111,14 @@ unsigned int createShaderProgram() {
     char* vertexShaderSource = Files_Read("./src/vertexShader.glsl");
     if(!vertexShaderSource){
         printf("[vertexShader]: Error\n");
-        window.Running = 0;
+        window.w.Running = 0;
         return 0;
     }
     
     char* fragmentShaderSource = Files_Read("./src/fragmentShader.glsl");
     if(!fragmentShaderSource){
         printf("[fragmentShader]: Error\n");
-        window.Running = 0;
+        window.w.Running = 0;
         return 0;
     }
     
@@ -301,11 +301,11 @@ void Mesh_Reload(){
 }
 void Menu_Set(int m){
 	if(Menu==0 && m==1){
-		AlxWindow_Mouse_SetInvisible(&window);
+		AlxWindow_Mouse_SetInvisible(&window.w);
 		SetMouse((Vec2){ GetWidth() / 2,GetHeight() / 2 });
 	}
 	if(Menu==1 && m==0){
-		AlxWindow_Mouse_SetVisible(&window);
+		AlxWindow_Mouse_SetVisible(&window.w);
 	}
 	
 	Menu = m;
@@ -349,7 +349,7 @@ void Jump(vec3d* Data){
 	Data->y = 0.0f;
 }
 
-void Setup(AlxWindow* w){
+void Setup(AglWindow* w){
     World = (Block*)malloc(WORLD_DX * WORLD_DY * WORLD_DZ * sizeof(Block));
 
     cubeSides = Vector_New(sizeof(CubeSide));
@@ -443,10 +443,10 @@ void Setup(AlxWindow* w){
     glBindTexture(GL_TEXTURE_2D, texture1);
 
     stbi_set_flip_vertically_on_load(1);
-    int w,h,n;
-    unsigned char* data = stbi_load("./data/Atlas.png", &w, &h, &n, 0);
+    int width,height,n;
+    unsigned char* data = stbi_load("./data/Atlas.png", &width, &height, &n, 0);
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, (n==3 ? GL_RGB : GL_RGBA), GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, (n==3 ? GL_RGB : GL_RGBA), GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -461,9 +461,8 @@ void Setup(AlxWindow* w){
     glUniform1i(glGetUniformLocation(shaderProgram,"texture1"),0);
     glUniform2f(glGetUniformLocation(shaderProgram,"uvScale"),TILE_WIDTH,TILE_HEIGHT);
 }
-
-void Update(AlxWindow* w){
-    angle += w->ElapsedTime;
+void Update(AglWindow* w){
+    angle += w->w.ElapsedTime;
 
     glViewport(0, 0, GetWidth(), GetHeight());
 
@@ -487,7 +486,7 @@ void Update(AlxWindow* w){
     if(Menu==1){
 		if(GetMouse().x!=GetMouseBefore().x || GetMouse().y!=GetMouseBefore().y){
 			Vec2 d = Vec2_Sub(GetMouse(),GetMouseBefore());
-			Vec2 a = Vec2_Mulf(Vec2_Div(d,(Vec2){ window.Width,window.Height }),3 * F32_PI);
+			Vec2 a = Vec2_Mulf(Vec2_Div(d,(Vec2){ window.w.Width,window.w.Height }),3 * F32_PI);
 	
 			RotY += -a.x;
 			RotX += a.y;
@@ -503,20 +502,20 @@ void Update(AlxWindow* w){
         Mode = Mode < 2 ? Mode+1 : 0;
 
     if(Stroke(ALX_KEY_W).DOWN){
-        vVelocity.x += lookFront.x * 20.0f * w->ElapsedTime;
-        vVelocity.z += lookFront.z * 20.0f * w->ElapsedTime;
+        vVelocity.x += lookFront.x * 20.0f * w->w.ElapsedTime;
+        vVelocity.z += lookFront.z * 20.0f * w->w.ElapsedTime;
     }
     if(Stroke(ALX_KEY_S).DOWN){
-        vVelocity.x -= lookFront.x * 20.0f * w->ElapsedTime;
-        vVelocity.z -= lookFront.z * 20.0f * w->ElapsedTime;
+        vVelocity.x -= lookFront.x * 20.0f * w->w.ElapsedTime;
+        vVelocity.z -= lookFront.z * 20.0f * w->w.ElapsedTime;
     }
     if(Stroke(ALX_KEY_A).DOWN){
-        vVelocity.x -= lookLeft.x * 20.0f * w->ElapsedTime;
-        vVelocity.z -= lookLeft.z * 20.0f * w->ElapsedTime;
+        vVelocity.x -= lookLeft.x * 20.0f * w->w.ElapsedTime;
+        vVelocity.z -= lookLeft.z * 20.0f * w->w.ElapsedTime;
     }
     if (Stroke(ALX_KEY_D).DOWN){
-        vVelocity.x += lookLeft.x * 20.0f * w->ElapsedTime;
-        vVelocity.z += lookLeft.z * 20.0f * w->ElapsedTime;
+        vVelocity.x += lookLeft.x * 20.0f * w->w.ElapsedTime;
+        vVelocity.z += lookLeft.z * 20.0f * w->w.ElapsedTime;
     }
     
     //if(Stroke(ALX_KEY_R).DOWN)      vVelocity.y = 14.0f;
@@ -533,7 +532,7 @@ void Update(AlxWindow* w){
 
 	float drag = OnGround ? 12.0f : 10.0f;
 	Vec2 da = Vec2_Norm(v);
-	v = Vec2_Sub(v,Vec2_Mulf(d,drag * w->ElapsedTime));
+	v = Vec2_Sub(v,Vec2_Mulf(d,drag * w->w.ElapsedTime));
 
 	if(F32_Sign(v.x)!=F32_Sign(da.x) || F32_Sign(v.y)!=F32_Sign(da.y)){
 		v.x = 0.0f;
@@ -548,8 +547,8 @@ void Update(AlxWindow* w){
 	vVelocity.x = v.x;
 	vVelocity.z = v.y;
 
-	vVelocity = vec3d_Add(vVelocity,vec3d_Mul((vec3d){ 0.0f,-10.0f,0.0f,1.0f },w->ElapsedTime));
-	camera = vec3d_Add(camera,vec3d_Mul(vVelocity,w->ElapsedTime));
+	vVelocity = vec3d_Add(vVelocity,vec3d_Mul((vec3d){ 0.0f,-10.0f,0.0f,1.0f },w->w.ElapsedTime));
+	camera = vec3d_Add(camera,vec3d_Mul(vVelocity,w->w.ElapsedTime));
 
 	Cubes_Reload();
 	OnGround = 0;
@@ -613,8 +612,7 @@ void Update(AlxWindow* w){
         glDrawArrays(GL_TRIANGLES, offset, 6);
     }
 }
-
-void Delete(AlxWindow* w){
+void Delete(AglWindow* w){
     if(World) free(World);
     World = NULL;
 
@@ -629,7 +627,7 @@ void Delete(AlxWindow* w){
 }
 
 int main(){
-    if(Create("3D Tex OpenGL",800,600,1,1,Setup,Update,Delete))
+    if(Create("3D Tex OpenGL",1920,1080,1,1,Setup,Update,Delete))
         Start();
     return 0;
 }
