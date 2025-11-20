@@ -4,8 +4,8 @@
 #include "./Math3D.h"
 
 typedef struct Rect3 {
-	vec3d p;
-	vec3d d;
+	Vec3D p;
+	Vec3D d;
 } Rect3;
 
 char Rect3_Overlap(Rect3 r1,Rect3 r2){
@@ -13,12 +13,12 @@ char Rect3_Overlap(Rect3 r1,Rect3 r2){
 }
 void Rect3_Static(Rect3* r1,Rect3 r2,void* Data,void (**Funcs)(void*)){
 	if(Rect3_Overlap(*r1,r2)){
-        vec3d m1 = vec3d_Add(r1->p,vec3d_Mul(r1->d,0.5f));
-        vec3d m2 = vec3d_Add(r2.p, vec3d_Mul(r2.d, 0.5f));
+        Vec3D m1 = Vec3D_Add(r1->p,Vec3D_Mul(r1->d,0.5f));
+        Vec3D m2 = Vec3D_Add(r2.p, Vec3D_Mul(r2.d, 0.5f));
 
-        vec3d l = vec3d_Add(r1->d,r2.d);
-        vec3d d = vec3d_Sub(m2,m1);
-        d = (vec3d){ d.x / l.x,d.y / l.y,d.z / l.z,1.0f };
+        Vec3D l = Vec3D_Add(r1->d,r2.d);
+        Vec3D d = Vec3D_Sub(m2,m1);
+        d = (Vec3D){ d.x / l.x,d.y / l.y,d.z / l.z,1.0f };
 
         if(F32_Abs(d.x)>F32_Abs(d.y)){
             if(F32_Abs(d.x)>F32_Abs(d.z)){

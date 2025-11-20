@@ -13,13 +13,13 @@ const int ATLAS_ROWS = 16;
 const float TILE_WIDTH = 1.0f / (float)ATLAS_COLS;
 const float TILE_HEIGHT = 1.0f / (float)ATLAS_ROWS;
 
-mat4x4 model;
-mat4x4 view;
-mat4x4 proj;
+M4x4D model;
+M4x4D view;
+M4x4D proj;
 
-vec3d camera = { 10.0f,10.0f,10.0f,1.0f };
-vec3d vVelocity = { 0.0f,0.0f,0.0f,1.0f };
-vec3d vLength = { 0.5f,1.8f,0.5f,1.0f };
+Vec3D camera = { 10.0f,10.0f,10.0f,1.0f };
+Vec3D vVelocity = { 0.0f,0.0f,0.0f,1.0f };
+Vec3D vLength = { 0.5f,1.8f,0.5f,1.0f };
 float RotX = 0.0f;
 float RotY = 0.0f;
 float angle = 0.0f;
@@ -60,7 +60,7 @@ typedef unsigned char Block;
 
 
 typedef struct CubeSide {
-    vec3d pos;
+    Vec3D pos;
     unsigned char id;
     unsigned char side;
 } CubeSide;
@@ -75,14 +75,14 @@ GLuint VBO, VAO;
 GLuint shaderProgram;
 GLuint texture1;
 
-vec2d getUVsFromIndex(int tileIndex) {
+Vec2D getUVsFromIndex(int tileIndex) {
     int col = tileIndex % ATLAS_COLS;
     int row = tileIndex / ATLAS_COLS;
 
     float u0 = (float)col * TILE_WIDTH;
     float v0 = (float)row * TILE_HEIGHT;
 
-    return (vec2d){ u0,v0 };
+    return (Vec2D){ u0,v0 };
 }
 void checkCompileErrors(GLuint shader, const char* type) {
     GLint success;
@@ -181,10 +181,10 @@ void World_SetX(Block* World,float x,float y,float z,Block b){
 	if(z<0.0f || z>=WORLD_DZ) return;
 	World[(int)x + (int)y * WORLD_DX + (int)z * WORLD_DX * WORLD_DY] = b;
 }
-Block World_Get(Block* World,vec3d p){
+Block World_Get(Block* World,Vec3D p){
 	return World_GetX(World,p.x,p.y,p.z);
 }
-void World_Set(Block* World,vec3d p,Block b){
+void World_Set(Block* World,Vec3D p,Block b){
 	World_SetX(World,p.x,p.y,p.z,b);
 }
 int World_Height(Block* World,float x,float z){
@@ -196,16 +196,16 @@ int World_Height(Block* World,float x,float z){
 	}
 	return h;
 }
-vec3d Neighbour_Side(int s){
+Vec3D Neighbour_Side(int s){
 	switch (s){
-	case CUBE_SIDE_NORTH: 	return (vec3d){ 0.0f, 0.0f,-1.0f,1.0f };
-	case CUBE_SIDE_EAST: 	return (vec3d){ 1.0f, 0.0f, 0.0f,1.0f };
-	case CUBE_SIDE_SOUTH: 	return (vec3d){ 0.0f, 0.0f, 1.0f,1.0f };
-	case CUBE_SIDE_WEST: 	return (vec3d){-1.0f, 0.0f, 0.0f,1.0f };
-	case CUBE_SIDE_TOP: 	return (vec3d){ 0.0f, 1.0f, 0.0f,1.0f };
-	case CUBE_SIDE_BOTTOM: 	return (vec3d){ 0.0f,-1.0f, 0.0f,1.0f };
+	case CUBE_SIDE_NORTH: 	return (Vec3D){ 0.0f, 0.0f,-1.0f,1.0f };
+	case CUBE_SIDE_EAST: 	return (Vec3D){ 1.0f, 0.0f, 0.0f,1.0f };
+	case CUBE_SIDE_SOUTH: 	return (Vec3D){ 0.0f, 0.0f, 1.0f,1.0f };
+	case CUBE_SIDE_WEST: 	return (Vec3D){-1.0f, 0.0f, 0.0f,1.0f };
+	case CUBE_SIDE_TOP: 	return (Vec3D){ 0.0f, 1.0f, 0.0f,1.0f };
+	case CUBE_SIDE_BOTTOM: 	return (Vec3D){ 0.0f,-1.0f, 0.0f,1.0f };
 	}
-	return (vec3d){ 0.0f,0.0f,0.0f,1.0f };
+	return (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 }
 unsigned char Block_Id(Block b,int s){
 	switch (b){
@@ -283,8 +283,8 @@ void Mesh_Reload(){
 
 				if(b!=BLOCK_VOID){
 					for(int s = 0;s<6;s++){
-						vec3d p = { k,j,i,1.0f };
-						vec3d n = vec3d_Add(p,Neighbour_Side(s));
+						Vec3D p = { k,j,i,1.0f };
+						Vec3D n = Vec3D_Add(p,Neighbour_Side(s));
 						
 						if(World_Get(World,n)==BLOCK_VOID){
 							Vector_Push(&cubeSides,(CubeSide[]){{
@@ -315,25 +315,25 @@ int Cubes_Compare(const void* e1,const void* e2) {
 	Rect3 r1 = *(Rect3*)e1;
 	Rect3 r2 = *(Rect3*)e2;
 	
-	vec3d pos = vec3d_Add(camera,(vec3d){ vLength.x * 0.5f,vLength.y * 0.9f,vLength.z * 0.5f });
-	vec3d d1 = vec3d_Sub(r1.p,pos);
-    vec3d d2 = vec3d_Sub(r2.p,pos);
-	return vec3d_Length(d1) == vec3d_Length(d2) ? 0 : (vec3d_Length(d1) < vec3d_Length(d2) ? 1 : -1);
+	Vec3D pos = Vec3D_Add(camera,(Vec3D){ vLength.x * 0.5f,vLength.y * 0.9f,vLength.z * 0.5f });
+	Vec3D d1 = Vec3D_Sub(r1.p,pos);
+    Vec3D d2 = Vec3D_Sub(r2.p,pos);
+	return Vec3D_Length(d1) == Vec3D_Length(d2) ? 0 : (Vec3D_Length(d1) < Vec3D_Length(d2) ? 1 : -1);
 }
 void Cubes_Reload(){
 	Vector_Clear(&Cubes);
 
-	vec3d f = { (int)camera.x,(int)camera.y,(int)camera.z,1.0f };
+	Vec3D f = { (int)camera.x,(int)camera.y,(int)camera.z,1.0f };
 	for(int i = -2;i<2;i++){
 		for(int j = -2;j<2;j++){
 			for(int k = -2;k<2;k++){
-				vec3d n = { k,j,i,1.0f };
-				vec3d r = vec3d_Add(f,n);
+				Vec3D n = { k,j,i,1.0f };
+				Vec3D r = Vec3D_Add(f,n);
 
 				Block b = World_Get(World,r);
 
 				if(b!=BLOCK_VOID && b!=BLOCK_ERROR){
-					Vector_Push(&Cubes,(Rect3[]){ { r,(vec3d){ 1.0f,1.0f,1.0f,1.0f } } });
+					Vector_Push(&Cubes,(Rect3[]){ { r,(Vec3D){ 1.0f,1.0f,1.0f,1.0f } } });
 				}
 			}
 		}
@@ -341,11 +341,11 @@ void Cubes_Reload(){
 
 	qsort(Cubes.Memory,Cubes.size,Cubes.ELEMENT_SIZE,Cubes_Compare);
 }
-void Stand(vec3d* Data){
+void Stand(Vec3D* Data){
 	Data->y = 0.0f;
 	OnGround = 1;
 }
-void Jump(vec3d* Data){
+void Jump(Vec3D* Data){
 	Data->y = 0.0f;
 }
 
@@ -466,22 +466,22 @@ void Update(AglWindow* w){
 
     glViewport(0, 0, GetWidth(), GetHeight());
 
-    mat4x4 rotX = Matrix_MakeRotationX(RotX);
-    mat4x4 rotY = Matrix_MakeRotationY(RotY);
+    M4x4D rotX = Matrix_MakeRotationX(RotX);
+    M4x4D rotY = Matrix_MakeRotationY(RotY);
     model = Matrix_MakeTranslation(0.0f,0.0f,0.0f);
     
-    vec3d vUp = (vec3d){ 0.0f,1.0f,0.0f,1.0f };
-	vec3d vTarget = (vec3d){ 0.0f,0.0f,1.0f,1.0f };
-	vec3d vLookDir = Matrix_MultiplyVector(Matrix_MultiplyMatrix(rotX,rotY),vTarget);
+    Vec3D vUp = (Vec3D){ 0.0f,1.0f,0.0f,1.0f };
+	Vec3D vTarget = (Vec3D){ 0.0f,0.0f,1.0f,1.0f };
+	Vec3D vLookDir = Matrix_MultiplyVector(Matrix_MultiplyMatrix(rotX,rotY),vTarget);
 	
-	vTarget = vec3d_Add(camera,vLookDir);
-	mat4x4 matCamera = Matrix_PointAt(camera,vTarget,vUp);
+	vTarget = Vec3D_Add(camera,vLookDir);
+	M4x4D matCamera = Matrix_PointAt(camera,vTarget,vUp);
 	view = Matrix_QuickInverse(matCamera);
     //view = Matrix_MultiplyMatrix(rotY,Matrix_MakeRotationX(RotX));
     proj = Matrix_MakeProjection(90.0f,(float)GetHeight() / (float)GetWidth(),0.1f,200.0f);
 
-    vec3d lookFront = Matrix_MultiplyVector(rotY,(vec3d){ 0.0f,0.0f,1.0f,1.0f });
-    vec3d lookLeft = Matrix_MultiplyVector(rotY,(vec3d){ 1.0f,0.0f,0.0f,1.0f });
+    Vec3D lookFront = Matrix_MultiplyVector(rotY,(Vec3D){ 0.0f,0.0f,1.0f,1.0f });
+    Vec3D lookLeft = Matrix_MultiplyVector(rotY,(Vec3D){ 1.0f,0.0f,0.0f,1.0f });
     
     if(Menu==1){
 		if(GetMouse().x!=GetMouseBefore().x || GetMouse().y!=GetMouseBefore().y){
@@ -547,18 +547,18 @@ void Update(AglWindow* w){
 	vVelocity.x = v.x;
 	vVelocity.z = v.y;
 
-	vVelocity = vec3d_Add(vVelocity,vec3d_Mul((vec3d){ 0.0f,-10.0f,0.0f,1.0f },w->w.ElapsedTime));
-	camera = vec3d_Add(camera,vec3d_Mul(vVelocity,w->w.ElapsedTime));
+	vVelocity = Vec3D_Add(vVelocity,Vec3D_Mul((Vec3D){ 0.0f,-10.0f,0.0f,1.0f },w->w.ElapsedTime));
+	camera = Vec3D_Add(camera,Vec3D_Mul(vVelocity,w->w.ElapsedTime));
 
 	Cubes_Reload();
 	OnGround = 0;
 	for(int i = 0;i<Cubes.size;i++){
-		vec3d pos = { -vLength.x * 0.5f,vLength.y * 0.65f,-vLength.z * 0.5f };
+		Vec3D pos = { -vLength.x * 0.5f,vLength.y * 0.65f,-vLength.z * 0.5f };
 
 		Rect3 r1 = *(Rect3*)Vector_Get(&Cubes,i);
-		Rect3 r2 = (Rect3){ vec3d_Sub(camera,pos),vLength };
+		Rect3 r2 = (Rect3){ Vec3D_Sub(camera,pos),vLength };
 		Rect3_Static(&r2,r1,&vVelocity,(void (*[])(void*)){ NULL,NULL,NULL,NULL,(void*)Jump,(void*)Stand });
-		camera = vec3d_Add(r2.p,pos);
+		camera = Vec3D_Add(r2.p,pos);
 	}
 
     //if(Stroke(ALX_KEY_UP).DOWN)     RotX -= F32_PI * w->ElapsedTime;
@@ -592,7 +592,7 @@ void Update(AglWindow* w){
     for (unsigned int i = 0; i < cubeSides.size; i++){
         CubeSide cs = *(CubeSide*)Vector_Get(&cubeSides,i);
         
-        mat4x4 mat = Matrix_MultiplyMatrix(
+        M4x4D mat = Matrix_MultiplyMatrix(
             model,
             Matrix_MakeTranslation(cs.pos.x,cs.pos.y,cs.pos.z)
             // Matrix_MultiplyMatrix(
@@ -604,7 +604,7 @@ void Update(AglWindow* w){
             // )
         );
 
-        vec2d atlaspos = getUVsFromIndex(Block_Id(cs.id,cs.side));
+        Vec2D atlaspos = getUVsFromIndex(Block_Id(cs.id,cs.side));
         glUniform2f(glGetUniformLocation(shaderProgram,"uvOffset"),atlaspos.u,atlaspos.v);
         glUniformMatrix4fv(glGetUniformLocation(shaderProgram,"model"),1,GL_FALSE,(const GLfloat*)&mat);
         
